@@ -60,6 +60,7 @@ const handleRun = async () => {
     });
 
     const data = await response.json();
+    console.log("complier response", data)
 
     if (!response.ok) {
       setOutput(data.error || "Something went wrong.");

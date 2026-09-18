@@ -1,33 +1,41 @@
 import { spawn } from "child_process";
 import crypto from "crypto";
 
-export function executeJavaScriptInDocker(code, input = "") {
-  return executeInDocker({
-    image: "online-compiler-javascript",
-    command: ["node", "-e", code],
+export function executeCInDocker(code, input = "") {
+  return executeCompiledInDocker({
+    image: "online-compiler-c",
+    sourceFile: "main.c",
+    compiler: "gcc",
+    source: code,
     input
   });
 }
 
-export function executePythonInDocker(code, input = "") {
-  return executeInDocker({
-    image: "online-compiler-python",
-    command: ["python", "-c", code],
+export function executeCppInDocker(code, input = "") {
+  return executeCompiledInDocker({
+    image: "online-compiler-cpp",
+    sourceFile: "main.cpp",
+    compiler: "g++",
+    source: code,
     input
   });
 }
 
-export function executeCInDocker(code , input = "" ) {
-  return executeCInDocker({
-       image: "online-compiler-c",
-       command: ["c","-c",code],
-       input
-  });
-}
-
-function executeInDocker({ image, command, input }) {
+function executeCompiledInDocker({
+  image,
+  sourceFile,
+  compiler,
+  source,
+  input
+}) {
   return new Promise((resolve) => {
     const containerName = `compiler-${crypto.randomUUID()}`;
+
+    const command = `
+      printf '%s' '${escapeShell(source)}' > /tmp/${sourceFile} &&
+      ${compiler} /tmp/${sourceFile} -o /tmp/program &&
+      /tmp/program
+    `;
 
     const dockerArgs = [
       "run",
@@ -37,24 +45,17 @@ function executeInDocker({ image, command, input }) {
 
       "--network",
       "none",
-
       "--cpus",
       "0.5",
-
       "--memory",
       "128m",
-
       "--pids-limit",
       "64",
 
-      "--read-only",
-
-      "--tmpfs",
-      "/tmp:rw,noexec,nosuid,size=16m",
-
       image,
-
-      ...command
+      "sh",
+      "-c",
+      command
     ];
 
     const process = spawn("docker", dockerArgs);
@@ -66,19 +67,15 @@ function executeInDocker({ image, command, input }) {
     process.stdout.on("data", (data) => {
       output += data.toString();
 
-      // Prevent excessive output
-      if (output.length > 100_000) {
+      if (output.length > 100000 && !finished) {
+        finished = true;
         process.kill();
 
-        if (!finished) {
-          finished = true;
-
-          resolve({
-            status: "error",
-            output: output.slice(0, 100_000),
-            error: "Output limit exceeded."
-          });
-        }
+        resolve({
+          status: "error",
+          output: output.slice(0, 100000),
+          error: "Output limit exceeded."
+        });
       }
     });
 
@@ -92,12 +89,10 @@ function executeInDocker({ image, command, input }) {
 
     process.stdin.end();
 
-    // 5 second timeout
     const timeout = setTimeout(() => {
       if (finished) return;
 
       finished = true;
-
       process.kill();
 
       resolve({
@@ -141,4 +136,10 @@ function executeInDocker({ image, command, input }) {
       });
     });
   });
+}
+
+function escapeShell(value) {
+  return value
+    .replace(/\\/g, "\\\\")
+    .replace(/'/g, "'\\''");
 }
