@@ -1,6 +1,6 @@
 import express from "express";
 import cors from "cors";
-import { executeJavaScriptInDocker, executePythonInDocker } from "./services/dockerExecutor.js";
+import { executeJavaScriptInDocker, executePythonInDocker , executeJavaInDocker} from "./services/dockerExecutor.js";
 import { executeCInDocker , executeCppInDocker} from "./services/compiledExecutor.js";  
 
 const app = express();
@@ -95,6 +95,21 @@ if (language === "cpp") {
   console.log("🟣 C++ Docker executor started");
 
   const result = await executeCppInDocker(code, input);
+
+  return res.json({
+    success: result.status === "success",
+    status: result.status,
+    output: result.output,
+    error: result.error
+  });
+}
+
+if (language === "java") {
+  console.log("☕ Java Docker executor started");
+
+  const result = await executeJavaInDocker(code, input);
+
+  console.log("Execution result:", result);
 
   return res.json({
     success: result.status === "success",
