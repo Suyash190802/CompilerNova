@@ -2,19 +2,20 @@ import { spawn } from "child_process";
 import crypto from "crypto";
 import fs from "fs/promises";
 import path from "path";
+import os from "os";
 
 // ==========================================
 // Start Interactive Docker Container
 // ==========================================
 export async function startInteractiveContainer(language, code , callbacks={}) {
-  const id = crypto.randomUUID();
+  const tempDir = path.join(
+  os.tmpdir(),
+  `online-compiler-interactive-${id}`
+);
 
-  const tempBase = path.join(process.cwd(), "interactive-temp");
-  const tempDir = path.join(tempBase, `session-${id}`);
-
-  await fs.mkdir(tempDir, {
-    recursive: true
-  });
+await fs.mkdir(tempDir, {
+  recursive: true
+});
 
   let sourceFile;
   let image;
