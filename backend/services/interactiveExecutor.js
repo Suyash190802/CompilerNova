@@ -79,37 +79,37 @@ export async function startInteractiveContainer(language, code , callbacks={}) {
     // C
     // ==========================================
     else if (language === "c") {
-      sourceFile = "main.c";
-      image = "online-compiler-c";
+  sourceFile = "main.c";
+  image = "online-compiler-c";
 
-      await fs.writeFile(
-        path.join(tempDir, sourceFile),
-        code,
-        "utf8"
-      );
+  await fs.writeFile(
+    path.join(tempDir, sourceFile),
+    code,
+    "utf8"
+  );
 
-      command =
-        `gcc /workspace/main.c -o /tmp/program && ` +
-        `/tmp/program`;
-    }
+  command =
+    `gcc /workspace/main.c -o /tmp/program && ` +
+    `stdbuf -o0 /tmp/program`;
+}
 
     // ==========================================
     // C++
     // ==========================================
-    else if (language === "cpp") {
-      sourceFile = "main.cpp";
-      image = "online-compiler-cpp";
+     else if (language === "cpp") {
+  sourceFile = "main.cpp";
+  image = "online-compiler-cpp";
 
-      await fs.writeFile(
-        path.join(tempDir, sourceFile),
-        code,
-        "utf8"
-      );
+  await fs.writeFile(
+    path.join(tempDir, sourceFile),
+    code,
+    "utf8"
+  );
 
-      command =
-        `g++ /workspace/main.cpp -o /tmp/program && ` +
-        `/tmp/program`;
-    }
+  command =
+    `g++ /workspace/main.cpp -o /tmp/program && ` +
+    `stdbuf -o0 /tmp/program`;
+}
 
     // ==========================================
     // Unsupported language
@@ -151,7 +151,7 @@ export async function startInteractiveContainer(language, code , callbacks={}) {
 
       // Writable temporary directory
       "--tmpfs",
-      "/tmp:rw,nosuid,size=32m",
+      "/tmp:rw,nosuid,size=32m,exec",
 
       // Source code
       "-v",

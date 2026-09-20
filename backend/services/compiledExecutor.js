@@ -115,7 +115,7 @@ async function executeCompiledInDocker({
       "--read-only",
 
       "--tmpfs",
-      "/tmp:rw,nosuid,size=32m",
+      "/tmp:rw,nosuid,size=32m,exec",
 
       "-v",
       `${tempDir}:/workspace:ro`,
