@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import Editor from "@monaco-editor/react";
 import "./App.css";
+const API_URL = import.meta.env.VITE_API_URL;
+const WS_URL = import.meta.env.VITE_WS_URL;
 
 function App() {
   const [language, setLanguage] = useState("javascript");
@@ -88,21 +90,19 @@ console.log(2 ** 10);`);
 
     try {
       const response = await fetch(
-        "http://localhost:5000/api/execute",
-        {
-          method: "POST",
-
-          headers: {
-            "Content-Type": "application/json"
-          },
-
-          body: JSON.stringify({
-            language,
-            code,
-            input
-          })
-        }
-      );
+  `${API_URL}/api/execute`,
+  {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      language,
+      code,
+      input
+      })
+     }
+   );
 
       const data = await response.json();
 
@@ -170,10 +170,7 @@ console.log(2 ** 10);`);
 
     console.log("Language:", language);
 
-    const socket = new WebSocket(
-      "ws://localhost:5000"
-    );
-
+   const socket = new WebSocket(WS_URL);
     wsRef.current = socket;
 
     // ========================================

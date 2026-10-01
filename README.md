@@ -69,3 +69,18 @@ The project is designed to provide a simple and interactive coding environment w
 * Improve container resource isolation
 * Add competitive programming features
 * Add syntax themes and editor customization
+
+
+Online Compiler
+│
+├── Features
+├── Supported Languages
+├── Tech Stack
+├── Architecture
+├── Docker Setup
+├── Installation
+├── Running Locally
+├── Normal Execution
+├── Interactive Execution
+├── Security
+└── Project Structure
